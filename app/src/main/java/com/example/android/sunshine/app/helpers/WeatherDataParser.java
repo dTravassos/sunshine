@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 
 public class WeatherDataParser {
 
-
     private Context ctx;
 
     private String unitType;
