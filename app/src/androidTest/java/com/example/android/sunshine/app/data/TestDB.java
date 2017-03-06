@@ -1,5 +1,6 @@
 package com.example.android.sunshine.app.data;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
@@ -62,14 +63,63 @@ public class TestDb extends AndroidTestCase {
     }
 
     public void testLocationTable() {
+        WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
+        ContentValues testValues = TestUtilities.createNorthPoleLocationValues();
+
+        long locationRowId;
+        locationRowId = db.insert(LocationEntry.TABLE_NAME, null, testValues);
+
+        assertTrue(locationRowId != -1);
+
+        Cursor cursor = db.query(
+                LocationEntry.TABLE_NAME,
+                    null, // all columns
+                    null, // Columns for the "where" clause
+                    null, // Values for the "where" clause
+                    null, // columns to group by
+                    null, // columns to filter by row groups
+                    null // sort order
+                );
+
+        assertTrue( "Error: No Records returned from location query", cursor.moveToFirst() );
+
+        TestUtilities.validateCurrentRecord("Error: Location Query Validation Failed", cursor, testValues);
+
+        assertFalse( "Error: More than one record returned from location query", cursor.moveToNext() );
+
+        cursor.close();
+        db.close();
 
     }
 
     public void testWeatherTable() {
-    }
+        long locationRowId;
+        locationRowId = TestUtilities.insertNorthPoleLocationValues(mContext);
 
-    public long insertLocation() {
-        return -1L;
+        WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues weatherValues = TestUtilities.createWeatherValues(locationRowId);
+
+        long weatherRowID;
+        weatherRowID = db.insert(WeatherEntry.TABLE_NAME, null, weatherValues);
+
+        assertTrue(weatherRowID != -1);
+
+        Cursor cursor = db.query(
+                WeatherEntry.TABLE_NAME,
+                null, // all columns
+                null, // Columns for the "where" clause
+                null, // Values for the "where" clause
+                null, // columns to group by
+                null, // columns to filter by row groups
+                null // sort order
+        );
+
+        TestUtilities.validateCursor("", cursor, weatherValues);
+
+        db.close();
     }
 }
